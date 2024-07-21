@@ -26,7 +26,9 @@ Core/Src/st7735.o: ../Core/Src/st7735.c ../Core/Inc/st7735.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_spi.h \
- ../Core/Inc/st7735.h ../Core/Inc/main.h
+ ../Core/Inc/st7735.h ../Core/Inc/ESP8266.h \
+ ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f401xc.h \
+ ../Core/Inc/SDFlash.h ../Core/Inc/main.h
 ../Core/Inc/st7735.h:
 ../Core/Inc/fonts.h:
 ../Core/Inc/st7735_cfg.h:
@@ -58,4 +60,7 @@ Core/Src/st7735.o: ../Core/Src/st7735.c ../Core/Inc/st7735.h \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_spi.h:
 ../Core/Inc/st7735.h:
+../Core/Inc/ESP8266.h:
+../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f401xc.h:
+../Core/Inc/SDFlash.h:
 ../Core/Inc/main.h:

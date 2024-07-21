@@ -1,0 +1,5 @@
+../Core/Src/SDFlash.c:3:6:SPI2_Init	4	static
+../Core/Src/SDFlash.c:27:6:SPI2_SendByte	16	static
+../Core/Src/SDFlash.c:34:9:SPI2_ReceiveByte	4	static
+../Core/Src/SDFlash.c:41:9:SPI2_TransferByte	16	static
+../Core/Src/SDFlash.c:48:6:SPI2_LoopbackTest	16	static

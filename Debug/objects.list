@@ -1,4 +1,5 @@
 "./Core/Src/ESP8266.o"
+"./Core/Src/SDFlash.o"
 "./Core/Src/fonts.o"
 "./Core/Src/main.o"
 "./Core/Src/st7735.o"

@@ -32,6 +32,9 @@ extern "C" {
 #include "st7735.h"
 #include "st7735_cfg.h"
 #include "fonts.h"
+#include "ESP8266.h"
+#include "SDFlash.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 

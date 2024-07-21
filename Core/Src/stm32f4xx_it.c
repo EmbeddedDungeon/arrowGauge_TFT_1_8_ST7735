@@ -67,6 +67,25 @@
 /**
   * @brief This function handles Non maskable interrupt.
   */
+void USART2_IRQHandler() {
+	 if (USART2->SR & USART_SR_RXNE) { // Проверяем, что прерывание вызвано приемом данных
+	        char received_char = USART2->DR; // Считываем принятый символ
+
+	        // Отправляем принятый символ назад
+	        while (!(USART2->SR & USART_SR_TXE)); // Ждем, пока буфер передачи освободится
+	        USART2->DR = received_char; // Передаем символ для отправки
+
+	        // Если нужно очистить флаг прерывания, это делается автоматически при чтении DR регистра
+
+	        // Сохраняем принятый символ в буфере
+			if (buffer_index < MAX_BUFFER_SIZE - 1) { // Проверяем, что есть место в буфере
+				buffer[buffer_index++] = received_char;
+				buffer[buffer_index] = '\0'; // Добавляем завершающий нулевой символ
+			}
+	 }
+
+}
+
 void NMI_Handler(void)
 {
   /* USER CODE BEGIN NonMaskableInt_IRQn 0 */

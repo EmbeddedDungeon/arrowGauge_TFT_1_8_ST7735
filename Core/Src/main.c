@@ -23,9 +23,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#define YMAX 5000
-#define Ymin 0
-volatile int sensorValue;
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -61,92 +59,50 @@ static void MX_SPI1_Init(void);
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
-void DrawLevelIndicators()
-{
-ST7735_DrawLine(0, 44, 70, 120, ST7735_BLACK);
-ST7735_DrawLine(70, 120, 90, 120, ST7735_BLACK);
-ST7735_DrawLine(90, 120, 159, 44, ST7735_BLACK);
-ST7735_DrawLine(1, 1, 200, 1, ST7735_BLACK);
 
-}
-void DrawIndicatorsArrow(int value)
-{
-	if (48 <= value <= 57)
-	{
-		ST7735_DrawLine( (value-47)*10, 44 , 80, 120, ST7735_RED);
-	}
-}
 /**
   * @brief  The application entry point.
   * @retval int
   */
 int main(void)
 {
-  /* USER CODE BEGIN 1 */
 
-  /* USER CODE END 1 */
-
-  /* MCU Configuration--------------------------------------------------------*/
-
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
-  /* USER CODE BEGIN Init */
 
-  /* USER CODE END Init */
-
-  /* Configure the system clock */
   SystemClock_Config();
 
-  /* USER CODE BEGIN SysInit */
 
-  /* USER CODE END SysInit */
-
-  /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_SPI1_Init();
-  /* USER CODE BEGIN 2 */
 
-
-
-
-
-  /* USER CODE END 2 */
 USARTinit();
 
 
-ST7735_Init();
+ST7735_Init();//допилинная-перепиленая библиотека из интернета
 
-GPIOA->LCKR&= ~(0b1100);
-   GPIOA->MODER &=	~(0b11110000);
-   GPIOA->PUPDR &= ~(0b11110000);
-   GPIOA->OTYPER &= ~(0b1100);
-   GPIOA->OSPEEDR &= ~(0b11110000);
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
 
-   ST7735_FillScreen(ST7735_BLUE);
-   int j = 0;
-   int d = 100;
 
-  while (1)
-  {		DrawLevelIndicators();
-//	  while ((USART2->SR & USART_SR_RXNE) == 0) {}
-//	      uint8_t d = USART2->DR;
-//	      ST7735_FillScreen(ST7735_BLUE);
-//	  while ((USART2->SR & USART_SR_TXE) == 0) {}
-//	  	  USART2->DR = d;
-//	  	char s[256];
-//	  	s[j] = ' ' + (d - 31);
+   ST7735_FillScreen(ST7735_RED);
 
-	  	DrawIndicatorsArrow(d);
-//	  	if(j <255)
-//	  	{
-//	  		j++;
-//		  ST7735_DrawString(10,0, s, Font_11x18, ST7735_RED, ST7735_BLACK);
-//	  	}
+   SPI2_Init();
+   //char flagSPI2 = SPI2_LoopbackTest();
+   //ST7735_DrawString(10, 30, &flagSPI2, Font_11x18, ST7735_RED, ST7735_BLACK);
 
+   while (1)
+  {
+	  ST7735_DrawString(10, 0, "hello", Font_11x18, ST7735_RED, ST7735_BLACK);
     /* USER CODE BEGIN 3 */
+	  if (buffer_index > 0) {
+	 	      ST7735_FillScreen(ST7735_BLUE);
+
+	       // Вызываем функцию для вывода текста на дисплей
+	       ST7735_DrawString(10, 0, buffer, Font_11x18, ST7735_RED, ST7735_BLACK);
+	       // Очищаем буфер
+	       buffer_index = 0;
+	       buffer[0] = '\0';
+	 	  }
+
   }
   /* USER CODE END 3 */
 }

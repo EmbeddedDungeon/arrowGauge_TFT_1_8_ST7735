@@ -1,4 +1,7 @@
 #include "ESP8266.h"
+#define MAX_BUFFER_SIZE 100
+char buffer[MAX_BUFFER_SIZE];
+volatile uint32_t buffer_index = 0;
 
 void USARTinit()
 {
@@ -22,4 +25,8 @@ void USARTinit()
 	   USART2->CR2 = 0;
 	   USART2->CR3 = 0;
 
+	   USART2->CR1 |= USART_CR1_RXNEIE; // Разрешаем прерывание по приему данных
+
+	   NVIC_SetPriority(USART2_IRQn, 0); // Устанавливаем приоритет прерывания USART2
+	   NVIC_EnableIRQ(USART2_IRQn); // Разрешаем прерывание USART2
 }

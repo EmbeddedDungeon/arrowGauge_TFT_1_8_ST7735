@@ -251,6 +251,11 @@ void ST7735_Init()
     ST7735_ExecuteCommandList(init_cmds2);
     ST7735_ExecuteCommandList(init_cmds3);
     TFT_CS_H();
+    GPIOA->LCKR&= ~(0b1100);
+       GPIOA->MODER &=	~(0b11110000);
+       GPIOA->PUPDR &= ~(0b11110000);
+       GPIOA->OTYPER &= ~(0b1100);
+       GPIOA->OSPEEDR &= ~(0b11110000);
 }
 
 void ST7735_DrawPixel(uint16_t x, uint16_t y, uint16_t color)
@@ -268,42 +273,43 @@ void ST7735_DrawPixel(uint16_t x, uint16_t y, uint16_t color)
 }
 
 
-void ST7735_DrawString(uint16_t x, uint16_t y, const char* str, FontDef font, uint16_t color, uint16_t bgcolor)
-{
+void ST7735_DrawString(uint16_t x, uint16_t y, const char* str, FontDef font, uint16_t color, uint16_t bgcolor) {
+    TFT_CS_L();
 
-	TFT_CS_L();
-
-    while(*str)
-    {
-        if(x + font.width >= _width)
-        {
+    while (*str) {
+        if (x + font.width >= _width) {
             x = 0;
             y += font.height;
-            if(y + font.height >= _height)
-            {
+            if (y + font.height >= _height) {
                 break;
             }
 
-            if(*str == ' ')
-            {
-                // skip spaces in the beginning of the new line
+            if (*str == ' ') {
+                // Пропускаем пробелы в начале новой строки
                 str++;
                 continue;
             }
         }
-        if(*str == ' ')
-		{
-        	x += font.width;
-			// skip spaces in the beginning of the new line
-			str++;
-			continue;
-		}
-        ST7735_WriteChar(x, y, *str, font, color, bgcolor);
+        if (*str == ' ') {
+            x += font.width;
+            // Пропускаем пробелы в начале новой строки
+            str++;
+            continue;
+        }
+
+        // Преобразуем символ в индекс для шрифта
+        uint8_t char_index = *str - 31;
+
+        // Выводим символ с полученным индексом
+        ST7735_WriteChar(x, y, char_index, font, color, bgcolor);
+
         x += font.width;
         str++;
     }
+
     TFT_CS_H();
 }
+
 
 void ST7735_FillRectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color)
 {

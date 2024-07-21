@@ -47,6 +47,8 @@
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
+ void USART2_IRQHandler(void);
+
 void NMI_Handler(void);
 void HardFault_Handler(void);
 void MemManage_Handler(void);
