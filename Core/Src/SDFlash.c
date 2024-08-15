@@ -1,5 +1,7 @@
 #include "SDFlash.h"
 
+#include "stm32f4xx.h"  // Убедитесь, что используете правильный заголовочный файл для вашей серии
+
 void SPI2_Init(void) {
     // Включаем тактирование для GPIOB и SPI2
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;  // Включаем тактирование для GPIOB
@@ -19,43 +21,41 @@ void SPI2_Init(void) {
     // Настройка SPI2
     SPI2->CR1 = 0;  // Сбросим регистр управления
     SPI2->CR1 |= SPI_CR1_MSTR;  // Устанавливаем режим ведущего (Master)
-    SPI2->CR1 |= SPI_CR1_BR;    // Настраиваем скорость передачи (Baud Rate)
+    SPI2->CR1 |= SPI_CR1_BR_2;          // Установите делитель 8 (10.5 MHz)
+    //SPI2->CR1 |= SPI_CR1_BR_1 | SPI_CR1_BR_0;  // Настраиваем скорость передачи (Baud Rate)
     SPI2->CR1 |= SPI_CR1_SSM | SPI_CR1_SSI;  // Программное управление SS (SSM) и внутренний сигнал SS (SSI)
-    SPI2->CR1 |= SPI_CR1_SPE;   // Включаем SPI2
+
+    // Включаем прерывания для TXE и RXNE
+    SPI2->CR2 |= SPI_CR2_TXEIE | SPI_CR2_RXNEIE;
+
+    // Включаем SPI2
+    SPI2->CR1 |= SPI_CR1_SPE;
+
+    // Включаем прерывания в NVIC
+    NVIC_EnableIRQ(SPI2_IRQn);
 }
+
 
 void SPI2_SendByte(uint8_t byte) {
-    while (!(SPI2->SR & SPI_SR_TXE));  // Ждем пока буфер передатчика не освободится
-    SPI2->DR = byte;
-    while (!(SPI2->SR & SPI_SR_RXNE)); // Ждем окончания передачи
-    (void)SPI2->DR;                    // Читаем принятый байт для очистки флага
-}
+    txBuffer[txHead] = byte;
+    txHead = (txHead + 1) % sizeof(txBuffer);
 
-uint8_t SPI2_ReceiveByte(void) {
-    while (!(SPI2->SR & SPI_SR_TXE));  // Ждем пока буфер передатчика не освободится
-    SPI2->DR = 0xFF;                   // Отправляем пустой байт
-    while (!(SPI2->SR & SPI_SR_RXNE)); // Ждем окончания приема
-    return SPI2->DR;                   // Читаем принятый байт
-}
-
-uint8_t SPI2_TransferByte(uint8_t byte) {
-    while (!(SPI2->SR & SPI_SR_TXE));  // Ждем пока буфер передатчика не освободится
-    SPI2->DR = byte;                   // Отправляем байт
-    while (!(SPI2->SR & SPI_SR_RXNE)); // Ждем окончания приема
-    return SPI2->DR;                   // Возвращаем принятый байт
-}
-
-char SPI2_LoopbackTest(void) {
-    uint8_t data = 0xAA;  // Данные для отправки
-    uint8_t received;
-
-    received = SPI2_TransferByte(data);
-
-    if (received == data) {
-        return 'y';
-    	// Успешно, данные совпадают
-    } else {
-    	return 'n';
-        // Ошибка, данные не совпадают
+    if ((txHead == txTail) && !(SPI2->CR2 & SPI_CR2_TXEIE)) {
+        SPI2->CR2 |= SPI_CR2_TXEIE;  // Включаем прерывание TXE только если буфер был пуст
     }
 }
+
+
+uint8_t SPI2_IsDataAvailable(void) {
+    return rxHead != rxTail;
+}
+
+uint8_t SPI2_GetReceivedByte(void) {
+    if (SPI2_IsDataAvailable()) {
+        uint8_t byte = rxBuffer[rxTail];
+        rxTail = (rxTail + 1) % sizeof(rxBuffer);
+        return byte;
+    }
+    return 0;  // Или другой код ошибки
+}
+

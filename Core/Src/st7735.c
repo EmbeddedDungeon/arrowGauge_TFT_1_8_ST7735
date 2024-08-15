@@ -218,24 +218,36 @@ static void ST7735_SetAddressWindow(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t 
 
 static void ST7735_WriteChar(uint16_t x, uint16_t y, char ch, FontDef font, uint16_t color, uint16_t bgcolor)
 {
-    uint32_t i, b, j;
+    uint32_t i, j;
+    uint16_t line;
 
-    ST7735_SetAddressWindow(x, y, x+font.width-1, y+font.height-1);
+    // Проверка символов, допустимых в таблице шрифтов
+    if (ch < 32 || ch > 126) return; // Поддерживаем только ASCII диапазон от 32 до 126
 
+    // Получаем индекс символа в таблице шрифтов
+    uint32_t char_index = ch - 32; // ASCII 32 - пробел как начало таблицы
+
+    // Устанавливаем адресное окно для рисования символа
+    ST7735_SetAddressWindow(x, y, x + font.width - 1, y + font.height - 1);
+
+    // Проходим по строкам высоты шрифта
     for(i = 0; i < font.height; i++)
     {
-        b = font.data[(ch-33) * font.height + i];
+        // Читаем строку шрифта
+        line = font.data[char_index * font.height + i];
 
+        // Проходим по каждому столбцу ширины шрифта
         for(j = 0; j < font.width; j++)
         {
-            if((b << j) & 0x8000)
+            // Проверяем, установлен ли бит
+            if (line & (0x8000 >> j))
             {
                 uint8_t data[] = { color >> 8, color & 0xFF };
                 ST7735_WriteData(data, sizeof(data));
             }
             else
             {
-                uint8_t data[] = { bgcolor >> 8, bgcolor & 0xFF };//
+                uint8_t data[] = { bgcolor >> 8, bgcolor & 0xFF };
                 ST7735_WriteData(data, sizeof(data));
             }
         }
@@ -297,11 +309,8 @@ void ST7735_DrawString(uint16_t x, uint16_t y, const char* str, FontDef font, ui
             continue;
         }
 
-        // Преобразуем символ в индекс для шрифта
-        uint8_t char_index = *str - 31;
-
         // Выводим символ с полученным индексом
-        ST7735_WriteChar(x, y, char_index, font, color, bgcolor);
+        ST7735_WriteChar(x, y, *str, font, color, bgcolor);
 
         x += font.width;
         str++;
@@ -309,6 +318,7 @@ void ST7735_DrawString(uint16_t x, uint16_t y, const char* str, FontDef font, ui
 
     TFT_CS_H();
 }
+
 
 
 void ST7735_FillRectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color)

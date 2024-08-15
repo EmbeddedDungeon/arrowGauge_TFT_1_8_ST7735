@@ -47,8 +47,6 @@
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
- void USART2_IRQHandler(void);
-
 void NMI_Handler(void);
 void HardFault_Handler(void);
 void MemManage_Handler(void);
@@ -59,7 +57,12 @@ void DebugMon_Handler(void);
 void PendSV_Handler(void);
 void SysTick_Handler(void);
 /* USER CODE BEGIN EFP */
-
+extern volatile uint8_t txBuffer[256];
+extern volatile uint8_t rxBuffer[256];
+extern volatile uint8_t txHead;
+extern volatile uint8_t txTail;
+extern volatile uint8_t rxHead;
+extern volatile uint8_t rxTail;
 /* USER CODE END EFP */
 
 #ifdef __cplusplus

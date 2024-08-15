@@ -19,7 +19,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
+#include "fatfs.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -66,33 +66,53 @@ static void MX_SPI1_Init(void);
   */
 int main(void)
 {
+  /* USER CODE BEGIN 1 */
 
+  /* USER CODE END 1 */
+
+  /* MCU Configuration--------------------------------------------------------*/
+
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
+  /* USER CODE BEGIN Init */
 
+  /* USER CODE END Init */
+
+  /* Configure the system clock */
   SystemClock_Config();
 
+  /* USER CODE BEGIN SysInit */
 
+  /* USER CODE END SysInit */
+
+  /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_SPI1_Init();
+  MX_FATFS_Init();
+  /* USER CODE BEGIN 2 */
+  USARTinit();
+  ST7735_Init();
 
-USARTinit();
+  ST7735_FillScreen(ST7735_RED);
+  SPI2_Init();
 
+  /* USER CODE END 2 */
 
-ST7735_Init();//допилинная-перепиленая библиотека из интернета
-
-
-
-   ST7735_FillScreen(ST7735_RED);
-
-   SPI2_Init();
-   //char flagSPI2 = SPI2_LoopbackTest();
-   //ST7735_DrawString(10, 30, &flagSPI2, Font_11x18, ST7735_RED, ST7735_BLACK);
-
-   while (1)
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
   {
-	  ST7735_DrawString(10, 0, "hello", Font_11x18, ST7735_RED, ST7735_BLACK);
+    /* USER CODE END WHILE */
+	  //uint8_t SDCardResult = SD_CheckCard();
+	  //SPI2_SendByte(SDCardResult);
+	  //char SDBuffer[2];
+	  //itoa(SDCardResult, SDBuffer, 10);
     /* USER CODE BEGIN 3 */
+	   // ST7735_DrawString(10, 30, SDBuffer, Font_11x18, ST7735_RED, ST7735_BLACK);
+	  ST7735_DrawString(10, 0, "hello2", Font_11x18, ST7735_RED, ST7735_BLACK);
+
+
 	  if (buffer_index > 0) {
 	 	      ST7735_FillScreen(ST7735_BLUE);
 

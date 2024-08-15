@@ -67,25 +67,6 @@
 /**
   * @brief This function handles Non maskable interrupt.
   */
-void USART2_IRQHandler() {
-	 if (USART2->SR & USART_SR_RXNE) { // Проверяем, что прерывание вызвано приемом данных
-	        char received_char = USART2->DR; // Считываем принятый символ
-
-	        // Отправляем принятый символ назад
-	        while (!(USART2->SR & USART_SR_TXE)); // Ждем, пока буфер передачи освободится
-	        USART2->DR = received_char; // Передаем символ для отправки
-
-	        // Если нужно очистить флаг прерывания, это делается автоматически при чтении DR регистра
-
-	        // Сохраняем принятый символ в буфере
-			if (buffer_index < MAX_BUFFER_SIZE - 1) { // Проверяем, что есть место в буфере
-				buffer[buffer_index++] = received_char;
-				buffer[buffer_index] = '\0'; // Добавляем завершающий нулевой символ
-			}
-	 }
-
-}
-
 void NMI_Handler(void)
 {
   /* USER CODE BEGIN NonMaskableInt_IRQn 0 */
@@ -219,6 +200,48 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /* USER CODE BEGIN 1 */
+void USART2_IRQHandler() {
+	 if (USART2->SR & USART_SR_RXNE) { // Проверяем, что прерывание вызвано приемом данных
+	        char received_char = USART2->DR; // Считываем принятый символ
+
+	        // Отправляем принятый символ назад
+	        while (!(USART2->SR & USART_SR_TXE)); // Ждем, пока буфер передачи освободится
+	        USART2->DR = received_char; // Передаем символ для отправки
+
+	        // Если нужно очистить флаг прерывания, это делается автоматически при чтении DR регистра
+
+	        // Сохраняем принятый символ в буфере
+			if (buffer_index < MAX_BUFFER_SIZE - 1) { // Проверяем, что есть место в буфере
+				buffer[buffer_index++] = received_char;
+				buffer[buffer_index] = '\0'; // Добавляем завершающий нулевой символ
+			}
+	 }
+
+}
+
+volatile uint8_t txBuffer[256];
+volatile uint8_t rxBuffer[256];
+volatile uint8_t txHead = 0;
+volatile uint8_t txTail = 0;
+volatile uint8_t rxHead = 0;
+volatile uint8_t rxTail = 0;
+
+void SPI2_IRQHandler(void) {
+    if (SPI2->SR & SPI_SR_TXE) {  // Прерывание при пустом буфере передачи
+        if (txHead != txTail) {
+            SPI2->DR = txBuffer[txTail];
+            txTail = (txTail + 1) % sizeof(txBuffer);
+        } else {
+            SPI2->CR2 &= ~SPI_CR2_TXEIE;  // Отключаем прерывание TXE, если буфер пуст
+        }
+    }
+
+    if (SPI2->SR & SPI_SR_RXNE) {  // Прерывание при получении данных
+        rxBuffer[rxHead] = SPI2->DR;
+        rxHead = (rxHead + 1) % sizeof(rxBuffer);
+    }
+}
+
 
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
